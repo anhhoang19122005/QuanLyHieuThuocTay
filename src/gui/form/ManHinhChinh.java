@@ -296,7 +296,7 @@ public class ManHinhChinh extends JFrame implements ActionListener{
 		updateButtonSize(btnKhachHang, newButtonWidth, newButtonHeight, newFontSize);
 		updateButtonSize(btnTaiKhoan, newButtonWidth, newButtonHeight, newFontSize);
 		updateButtonSize(btnThuoc, newButtonWidth, newButtonHeight, newFontSize);
-		updateButtonSize(btnNhaCungCap, newButtonWidth, newButtonHeight, newFontSize);
+		updateButtonSize(btnNhaCungCap, 180, newButtonHeight, newFontSize);
 		
 		// Điều chỉnh kích thước user info panel
 		int newUserPanelWidth = (int)(baseUserPanelWidth * scale);
