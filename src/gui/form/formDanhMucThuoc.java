@@ -6,6 +6,7 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Frame;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
@@ -13,11 +14,13 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
@@ -26,12 +29,12 @@ import com.formdev.flatlaf.extras.FlatSVGIcon;
 
 import dao.DanhMucThuocDAO;
 import entity.DanhMucThuoc;
-import entity.TaiKhoan;
+import gui.dialog.DialogCapNhatDanhMucThuoc;
+import gui.dialog.DialogThemDanhMucThuoc;
 
 public class formDanhMucThuoc extends JPanel {
     private JPanel actionPanel;
     private JButton btnAdd;
-    private JButton btnDelete;
     private JButton btnReload;
     private JButton btnUpdate;
     private JComboBox<String> cboxSearch;
@@ -63,7 +66,6 @@ public class formDanhMucThuoc extends JPanel {
         actionPanel = new JPanel();
         btnAdd = new JButton();
         btnUpdate = new JButton();
-        btnDelete = new JButton();
         tablePanel = new JPanel();
         jScrollPane1 = new JScrollPane();
         table = new JTable();
@@ -92,7 +94,7 @@ public class formDanhMucThuoc extends JPanel {
 
         cboxSearch.setToolTipText("");
         cboxSearch.setPreferredSize(new Dimension(120, 40));
-        String[] searchType = {"Tất cả", "Mã", "Tên", "Số điện thoại", "Năm sinh"};
+        String[] searchType = {"Tất cả", "Mã danh mục", "Tên danh mục"};
         DefaultComboBoxModel<String> model = new DefaultComboBoxModel<>(searchType);
         cboxSearch.setModel(model);
         jPanel3.add(cboxSearch);
@@ -135,6 +137,9 @@ public class formDanhMucThuoc extends JPanel {
         btnAdd.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         btnAdd.setPreferredSize(new Dimension(90, 90));
         btnAdd.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnAdd.addActionListener(e -> {
+        	themDanhMucThuoc();
+        });
         actionPanel.add(btnAdd);
 
         btnUpdate.setFont(new Font("Roboto", Font.BOLD, 14));
@@ -148,20 +153,11 @@ public class formDanhMucThuoc extends JPanel {
         btnUpdate.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         btnUpdate.setPreferredSize(new Dimension(90, 90));
         btnUpdate.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        
+        btnUpdate.addActionListener(e -> {
+        	capNhatDanhMucThuoc();
+        });
         actionPanel.add(btnUpdate);
-
-        btnDelete.setFont(new Font("Roboto", Font.BOLD, 14));
-        btnDelete.setIcon(new FlatSVGIcon("./img/delete.svg"));
-        btnDelete.setText("XÓA");
-        btnDelete.setBorder(null);
-        btnDelete.setBorderPainted(false);
-        btnDelete.setContentAreaFilled(false); // REMOVE BUTTON BACKGROUND
-        btnDelete.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnDelete.setFocusPainted(false);
-        btnDelete.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        btnDelete.setPreferredSize(new Dimension(90, 90));
-        btnDelete.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        actionPanel.add(btnDelete);
 
         headerPanel.add(actionPanel, BorderLayout.WEST);
 
@@ -211,10 +207,38 @@ public class formDanhMucThuoc extends JPanel {
         loadDataTable();
     }
     
-    private void loadDataTable() throws SQLException {
+    private void capNhatDanhMucThuoc() {
+    	int selectedRow = table.getSelectedRow();
+    	if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn danh mục thuốc cần cập nhật!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+    	try {
+			DanhMucThuoc dmt = dmtDAO.getDanhMucThuocQuaMaDanhMuc((String)table.getValueAt(selectedRow, 0));
+			DialogCapNhatDanhMucThuoc dialog = new DialogCapNhatDanhMucThuoc((Frame) SwingUtilities.getWindowAncestor(this),this,dmt);
+			dialog.setVisible(true);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	private void loadDataTable() throws SQLException {
     	ArrayList<DanhMucThuoc> dsDMT = dmtDAO.getDsDanhMucThuoc();
     	for (DanhMucThuoc dmt : dsDMT) {
     		tableModel.addRow(new Object[] {dmt.getMaDanhMuc(), dmt.getTenDanhMuc()});
     	}
     }
+    
+    private void themDanhMucThuoc() {
+    	DialogThemDanhMucThuoc dialog = new DialogThemDanhMucThuoc(
+    			(Frame) SwingUtilities.getWindowAncestor(this),this);
+    	dialog.setVisible(true);
+    }
+
+	public void reloadTable() throws SQLException {
+		tableModel.setRowCount(0);
+		loadDataTable();
+		
+	}
 }
