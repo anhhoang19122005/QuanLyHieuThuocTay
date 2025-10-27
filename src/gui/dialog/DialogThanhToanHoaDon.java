@@ -3,6 +3,7 @@ package gui.dialog;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -690,10 +691,15 @@ private void taoMaQrCode() {
 	private void inHoaDon() {
         try {
             // Đường dẫn
-            String fileName = "HoaDon_" + lblMaHoaDon.getText() + "_" +
-                    new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ".pdf";
-            String outputPath = "src/LuuHoaDonInRa/" + fileName;
+        	String folderPath = "src/LuuHoaDonInRa";
+        	String fileName = "HoaDon_" + lblMaHoaDon.getText() + "_" +
+        	        new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ".pdf";
+        	String outputPath = folderPath + "/" + fileName;
 
+            File folder = new File(folderPath);
+            if (!folder.exists()) {
+                folder.mkdirs(); // 
+            }
             // === TẠO TÀI LIỆU PDF ===
             com.itextpdf.text.Document document = new com.itextpdf.text.Document(PageSize.A4, 40, 40, 40, 40);
             com.itextpdf.text.pdf.PdfWriter.getInstance(document, new java.io.FileOutputStream(outputPath));
