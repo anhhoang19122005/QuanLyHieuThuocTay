@@ -1,7 +1,6 @@
 package gui.form;
 
 import java.awt.*;
-import java.awt.event.*;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -14,12 +13,16 @@ import com.formdev.flatlaf.extras.FlatSVGIcon;
 
 import dao.HoaDonDAO;
 import entity.HoaDon;
-import gui.dialog.DialogChiTietHoaDonTK;
+import gui.dialog.DialogChiTietHoaDon;
 
 public class FormTimKiemHoaDon extends JPanel 
 {
-    // Search Panel Components
-    private JTextField txtMaHD;
+  
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private JTextField txtMaHD;
     private JTextField txtMaNV;
     private JTextField txtMaKH;
     private JTextField txtMaThue;
@@ -27,25 +30,25 @@ public class FormTimKiemHoaDon extends JPanel
     private JTextField txtMaPDT;
     private JTextField txtNgayLap;
     
-    // Button Components
+   
     private JButton btnTimKiem;
     private JButton btnLamMoi;
     private JButton btnXuatExcel;
     private JButton btnXemChiTiet;
     
-    // Table Components
+ 
     private JTable table;
     private DefaultTableModel tableModel;
     private JScrollPane scrollPane;
     private JLabel lblKetQua;
     
-    // DAO
+    
     private HoaDonDAO hoaDonDAO;
     
-    // Date formatter
+   
     private SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
     
-    // Fonts
+    
     private Font labelFont = new Font("Roboto", Font.PLAIN, 14);
     private Font fieldFont = new Font("Roboto", Font.PLAIN, 14);
     private Font titleFont = new Font("Roboto", Font.BOLD, 24);
@@ -185,9 +188,7 @@ public class FormTimKiemHoaDon extends JPanel
         return mainPanel;
     }
     
-    /**
-     * Tạo panel chứa các nút chức năng
-     */
+    // button panel
     private JPanel createButtonPanel() {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 15));
         buttonPanel.setBackground(Color.WHITE);
@@ -292,14 +293,14 @@ public class FormTimKiemHoaDon extends JPanel
         table.getTableHeader().setForeground(Color.WHITE);
         table.getTableHeader().setReorderingAllowed(false);
         
-        // Center align
+        // Căn giữa
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(JLabel.CENTER);
         for (int i = 0; i < table.getColumnCount(); i++) {
             table.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
         }
         
-        // Column widths
+        // Chiều rộng cột
         table.getColumnModel().getColumn(0).setPreferredWidth(100);
         table.getColumnModel().getColumn(1).setPreferredWidth(120);
         table.getColumnModel().getColumn(2).setPreferredWidth(100);
@@ -316,19 +317,14 @@ public class FormTimKiemHoaDon extends JPanel
         
         return tablePanel;
     }
-    
-    /**
-     * Tạo label với font chuẩn
-     */
+    // Style label
     private JLabel createLabel(String text) {
         JLabel label = new JLabel(text);
         label.setFont(labelFont);
         return label;
     }
     
-    /**
-     * Tạo text field với style chuẩn
-     */
+    // style jtextfield
     private JTextField createTextField() {
         JTextField textField = new JTextField();
         textField.setFont(fieldFont);
@@ -466,7 +462,6 @@ public class FormTimKiemHoaDon extends JPanel
         String maHD = tableModel.getValueAt(selectedRow, 0).toString();
         
         try {
-            // Lấy hóa đơn từ DAO
             ArrayList<HoaDon> allHoaDon = hoaDonDAO.getDsHoaDon();
             HoaDon hd = null;
             
@@ -478,10 +473,8 @@ public class FormTimKiemHoaDon extends JPanel
             }
             
             if (hd != null) {
-                // Hiển thị dialog chi tiết
-                DialogChiTietHoaDonTK dialog = new DialogChiTietHoaDonTK(
-                    (Frame) SwingUtilities.getWindowAncestor(this),
-                    hd
+                DialogChiTietHoaDon dialog = new DialogChiTietHoaDon(
+                    (JFrame) SwingUtilities.getWindowAncestor(this),maHD
                 );
                 dialog.setVisible(true);
             } else {
@@ -499,9 +492,7 @@ public class FormTimKiemHoaDon extends JPanel
         }
     }
     
-    /**
-     * Xuất kết quả ra file Excel
-     */
+    
     private void xuatExcel() {
         if (tableModel.getRowCount() == 0) {
             JOptionPane.showMessageDialog(this,
