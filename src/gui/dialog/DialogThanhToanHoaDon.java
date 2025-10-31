@@ -52,6 +52,7 @@ public class DialogThanhToanHoaDon extends JDialog  {
     private JLabel lblNhanVien;
     private JLabel lblKhachHang;
     private JLabel lblSoDienThoai;
+    private JLabel lblMaPhieuDat;
     private JTable tableChiTiet;
     private DefaultTableModel tableModel;
     private JTextField txtTongTien;
@@ -77,7 +78,7 @@ public class DialogThanhToanHoaDon extends JDialog  {
      */
     public DialogThanhToanHoaDon(Frame parent, String maHoaDon, String tenKhachHang, 
                                String soDienThoai, ArrayList<ChiTietHoaDon> dsChiTietHoaDon, 
-                               double tongTien, double tienNhanVao, String maNhanVien) {
+                               double tongTien, double tienNhanVao, String maNhanVien, String maPhieuDat) {
         super(parent, "Chi Tiết Hóa Đơn", true);
         thueDAO = new ThueDAO();
         thuocDAO = new ThuocDAO();
@@ -85,7 +86,7 @@ public class DialogThanhToanHoaDon extends JDialog  {
         cthdDAO = new ChiTietHoaDonDAO();
         hdDAO = new HoaDonDAO();
         khDAO = new KhachHangDAO();
-        initComponents(maHoaDon, tenKhachHang, soDienThoai, dsChiTietHoaDon, tongTien, tienNhanVao, maNhanVien);
+        initComponents(maHoaDon, tenKhachHang, soDienThoai, dsChiTietHoaDon, tongTien, tienNhanVao, maNhanVien,maPhieuDat);
         setLocationRelativeTo(parent);
     }
     
@@ -94,7 +95,7 @@ public class DialogThanhToanHoaDon extends JDialog  {
      */
     private void initComponents(String maHoaDon, String tenKhachHang, String soDienThoai,
                                ArrayList<ChiTietHoaDon> dsChiTietHoaDon, double tongTien, 
-                               double tienNhanVao, String maNhanVien) {
+                               double tienNhanVao, String maNhanVien, String maPhieuDat) {
         
         setSize(900, 800);
         setResizable(false);
@@ -204,9 +205,16 @@ public class DialogThanhToanHoaDon extends JDialog  {
         lblSoDienThoai.setFont(valueFont);
         row3.add(lblSoDienThoai);
         
-        // Ô trống để cân đối layout
-        row3.add(new JLabel(""));
-        row3.add(new JLabel(""));
+        // Nếu có mã phiếu đặt thì thêm vào
+        if (maPhieuDat != null) {
+	        JLabel lblMaPhieuDatLabel = new JLabel("Mã phiếu đặt");
+	        lblMaPhieuDatLabel.setFont(labelFont);
+	        row3.add(lblMaPhieuDatLabel);
+	        
+	        lblMaPhieuDat = new JLabel(maPhieuDat == null ? "" : maPhieuDat);
+	        lblMaPhieuDat.setFont(valueFont);
+	        row3.add(lblMaPhieuDat);
+        }
         
         infoPanel.add(row3);
         

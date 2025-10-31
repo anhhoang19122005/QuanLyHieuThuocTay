@@ -6,30 +6,49 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Frame;
+import java.awt.Window;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 
+import dao.ChiTietPhieuDatThuocDAO;
+import dao.HoaDonDAO;
+import dao.KhachHangDAO;
 import dao.PhieuDatThuocDAO;
+import entity.ChiTietHoaDon;
+import entity.ChiTietPhieuDatThuoc;
+import entity.HoaDon;
+import entity.KhachHang;
 import entity.PhieuDatThuoc;
+import entity.TaiKhoan;
+import entity.Thuoc;
+import gui.dialog.DialogChiTietHoaDon;
+import gui.dialog.DialogChiTietPhieuDatThuoc;
+import gui.dialog.DialogThanhToanHoaDon;
 
 public class formPhieuDatThuoc extends JPanel {
     private JPanel actionPanel;
     private JButton btnThanhToan;
     private JButton btnReload;
+    private JButton btnInfo;
     private JComboBox<String> cboxSearch;
     private JPanel headerPanel;
     private JPanel jPanel1;
@@ -42,12 +61,20 @@ public class formPhieuDatThuoc extends JPanel {
     private JTextField txtSearch;
     private DefaultTableModel tableModel;
     private PhieuDatThuocDAO pdtDAO;
+    private ChiTietPhieuDatThuocDAO ctpdtDAO;
+    private HoaDonDAO hdDAO;
+    private TaiKhoan taiKhoan;
     Font headerTable = new Font("Roboto", Font.BOLD, 18);
-    public formPhieuDatThuoc() {
+	private KhachHangDAO khDAO;
+    public formPhieuDatThuoc(TaiKhoan tk) {
     	taoNoiDung();
+    	this.taiKhoan = tk;
     }
 
     private void taoNoiDung() {
+    	khDAO = new KhachHangDAO();
+    	hdDAO = new HoaDonDAO();
+    	ctpdtDAO = new ChiTietPhieuDatThuocDAO();
     	pdtDAO = new PhieuDatThuocDAO();
         headerPanel = new JPanel();
         jPanel1 = new JPanel();
@@ -57,6 +84,7 @@ public class formPhieuDatThuoc extends JPanel {
         btnReload = new JButton();
         actionPanel = new JPanel();
         btnThanhToan = new JButton();
+        btnInfo = new JButton();
         tablePanel = new JPanel();
         jScrollPane1 = new JScrollPane();
         table = new JTable();
@@ -85,7 +113,7 @@ public class formPhieuDatThuoc extends JPanel {
 
         cboxSearch.setToolTipText("");
         cboxSearch.setPreferredSize(new Dimension(120, 40));
-        String[] searchType = {"Tất cả", "Mã", "Tên", "Số điện thoại", "Năm sinh"};
+        String[] searchType = {"Tất cả", "Mã", "Trạng thái"};
         DefaultComboBoxModel<String> model = new DefaultComboBoxModel<>(searchType);
         cboxSearch.setModel(model);
         jPanel3.add(cboxSearch);
@@ -100,12 +128,20 @@ public class formPhieuDatThuoc extends JPanel {
         btnReload.setToolTipText("Làm mới");
         btnReload.setBorder(null);
         btnReload.setBorderPainted(false);
-        btnReload.setContentAreaFilled(false); // REMOVE BUTTON BACKGROUND
+        btnReload.setContentAreaFilled(false); 
         btnReload.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnReload.setFocusPainted(false);
         btnReload.setFocusable(false);
         btnReload.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        btnReload.setPreferredSize(new Dimension(48, 48)); // Slightly larger button
+        btnReload.setPreferredSize(new Dimension(48, 48)); 
+        btnReload.addActionListener(e -> {
+        	try {
+				loadTableData();
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+        });
         jPanel3.add(btnReload);
 
         jPanel1.add(jPanel3);
@@ -114,7 +150,6 @@ public class formPhieuDatThuoc extends JPanel {
 
         actionPanel.setBackground(new Color(255, 255, 255));
         actionPanel.setPreferredSize(new Dimension(600, 100));
-        // Increase gap between buttons from 6 to 24, vertical gap 15
         actionPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 24, 15));
 
         btnThanhToan.setFont(new Font("Roboto", Font.BOLD, 14));
@@ -128,7 +163,31 @@ public class formPhieuDatThuoc extends JPanel {
         btnThanhToan.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         btnThanhToan.setPreferredSize(new Dimension(90, 90));
         btnThanhToan.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnThanhToan.addActionListener(e -> {
+        	try {
+				thanhToanPhieuDatThuoc();
+			} catch (SQLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+        });
         actionPanel.add(btnThanhToan);
+        
+        btnInfo.setFont(new Font("Roboto", Font.BOLD, 14));
+        btnInfo.setIcon(new FlatSVGIcon("./img/info.svg"));
+        btnInfo.setText("INFO");
+        btnInfo.setBorder(null);
+        btnInfo.setBorderPainted(false);
+        btnInfo.setContentAreaFilled(false); 
+        btnInfo.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnInfo.setFocusPainted(false);
+        btnInfo.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnInfo.setPreferredSize(new Dimension(90, 90));
+        btnInfo.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnInfo.addActionListener(e -> {
+        	xemChiTiet();
+        });
+        actionPanel.add(btnInfo);
 
         headerPanel.add(actionPanel, BorderLayout.WEST);
 
@@ -182,7 +241,76 @@ public class formPhieuDatThuoc extends JPanel {
         add(tablePanel, BorderLayout.CENTER);
     }
     
-    private void loadTableData() throws Exception {
+    private void thanhToanPhieuDatThuoc() throws SQLException {
+    	int selectedRow = table.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this,
+                "Vui lòng chọn phiếu đặt thuốc cần xem chi tiết!",
+                "Cảnh báo",
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        String trangThai = table.getValueAt(selectedRow, 5).toString();
+        if (trangThai.equals("Đã hoàn thành")) {
+        	JOptionPane.showMessageDialog(this, "Phiếu đặt thuốc đã hoàn thành!");
+        	return;
+        }
+        
+        String maPhieuDat = table.getValueAt(selectedRow, 0).toString();
+        System.out.println(maPhieuDat);
+        PhieuDatThuoc pdt = pdtDAO.getPhieuDatThuocQuaMaPhieuDat(maPhieuDat);
+        KhachHang kh = khDAO.getKhachHangTheoMa(pdt.getKhachHang().getMaKH());
+        ArrayList<ChiTietPhieuDatThuoc> dsCTPDT = ctpdtDAO.getChiTietPhieuDatThuocQuaMaPhieuDatThuoc(maPhieuDat);
+        ArrayList<ChiTietHoaDon> temp = new ArrayList<ChiTietHoaDon>();
+        String maHD = hdDAO.generateMaHD();
+        double tongTien = 0;
+        for (ChiTietPhieuDatThuoc ctpdt : dsCTPDT) {
+        	String maThuoc = ctpdt.getThuoc().getMaThuoc();
+        	double donGia = ctpdt.getDonGia();
+        	int soLuong = ctpdt.getSoLuong();
+        	ChiTietHoaDon cthd = new ChiTietHoaDon(new HoaDon(maHD), new Thuoc(maThuoc), soLuong, donGia);
+        	tongTien += cthd.getThanhTien();
+        	temp.add(cthd);
+        }
+        Window window = SwingUtilities.getWindowAncestor(this);
+        Frame frame = null;
+        if (window instanceof Frame) {
+            frame = (Frame) window;
+        }
+        DialogThanhToanHoaDon dialog = new DialogThanhToanHoaDon(frame,maHD,kh.getMaKH(),kh.getSoDienThoai()
+        		,temp,tongTien,0,taiKhoan.getNhanVien().getMaNV(),maPhieuDat);
+        dialog.setVisible(true);
+        
+        if (dialog.isConfirmed()) {
+        	if(pdtDAO.capNhatTrangThaiPhieuDatThuoc(maPhieuDat, "Đã hoàn thành")) {
+        		JOptionPane.showMessageDialog(this, "Đã thanh toán phiếu đặt thuốc thành công");
+        	}
+        }
+    }
+    
+    private void xemChiTiet() {
+        int selectedRow = table.getSelectedRow();
+
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this,
+                "Vui lòng chọn phiếu đặt thuốc cần xem chi tiết!",
+                "Cảnh báo",
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        String maPhieuDat = table.getValueAt(selectedRow, 0).toString();
+
+        DialogChiTietPhieuDatThuoc dialog = new DialogChiTietPhieuDatThuoc(
+            (javax.swing.JFrame) SwingUtilities.getWindowAncestor(this),
+            maPhieuDat
+        );
+        dialog.setVisible(true);
+		
+	}
+
+	private void loadTableData() throws Exception {
     	ArrayList<PhieuDatThuoc> dsPDT = pdtDAO.getDsPhieuDatThuoc();
     	for (PhieuDatThuoc pdt : dsPDT) {
     		tableModel.addRow(new Object[] {pdt.getMaPhieuDat(), pdt.getNgayDat(),pdt.getKhachHang().getMaKH(),pdt.getDiaChi(),

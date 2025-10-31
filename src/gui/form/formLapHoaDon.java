@@ -1200,7 +1200,7 @@ private void btnThanhToanActionPerformed(java.awt.event.ActionEvent evt) {
             sdt,
             dsChiTietHoaDon,
             tongTien,
-            tienNhanVao, taiKhoan.getNhanVien().getMaNV()
+            tienNhanVao, taiKhoan.getNhanVien().getMaNV(), null
         );
         
         dialog.setVisible(true);

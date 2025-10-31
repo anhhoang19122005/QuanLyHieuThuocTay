@@ -182,7 +182,7 @@ public class ManHinhChinh extends JFrame implements ActionListener{
 		// Thuốc
 		btnThuoc = taoButtonDep("Thuốc", "src/img/medicine.svg", baseButtonWidth, baseButtonHeight);
 		JPopupMenu dropMenuThuoc = new JPopupMenu();
-		String[] chucNangThuoc = {"Quản lý thuốc", "Tìm kiếm thuốc", "Danh Mục Thuốc"};
+		String[] chucNangThuoc = {"Quản lý thuốc", "Tìm kiếm thuốc", "Danh Mục Thuốc", "Đổi / Trả thuốc"};
 		themMenuItem(dropMenuThuoc, chucNangThuoc, this);
 		btnThuoc.addActionListener(e -> {
 			dropMenuThuoc.show(btnThuoc,0,btnThuoc.getHeight());
@@ -559,7 +559,7 @@ public class ManHinhChinh extends JFrame implements ActionListener{
 			hienThiForm(new formThue());
 		}
 		else if(command.equals("Phiếu Đặt Thuốc")) {
-			hienThiForm(new formPhieuDatThuoc());
+			hienThiForm(new formPhieuDatThuoc(taiKhoan));
 		}
 		else if(command.equals("Phiếu Nhập Thuốc")) {
 			hienThiForm(new FormPhieuNhapThuoc());
