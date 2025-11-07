@@ -759,7 +759,6 @@ private void taoMaQrCode() {
 
             document.add(table);
             document.add(new Paragraph(" "));
-
             document.add(new Paragraph("Tổng tiền: " + txtTongTien.getText(), fontNormal));
             document.add(new Paragraph("Thuế: " + txtThue.getText(), fontNormal));
             document.add(new Paragraph("Giảm giá: " + txtGiamGia.getText(), fontNormal));
